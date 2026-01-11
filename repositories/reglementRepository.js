@@ -40,7 +40,7 @@ class ReglementRepository {
   async countFindAllReglement() {
     return (
       await db.claudexBarsDB.query(`
-        SELECT CAST(count(sous_requete.id) AS VARCHAR(255)) AS reglementTotalNumber 
+        SELECT CAST(count(sous_requete.id) AS CHAR(255)) AS reglementTotalNumber 
         FROM (
             SELECT r.id, r.created_at AS createdAt, u.firstname, u.lastname, f.code as codeFacture, c.name as client, r.totalFacture as totalFacture 
             FROM reglements r 
@@ -57,7 +57,7 @@ class ReglementRepository {
   async countFindAllReglementMonth() {
     return (
       await db.claudexBarsDB.query(`
-        SELECT CAST(SUM(totalFacture)AS VARCHAR(255)) AS reglementMonthTotalNumber 
+        SELECT CAST(SUM(totalFacture)AS CHAR(255)) AS reglementMonthTotalNumber 
         FROM reglements
         WHERE YEAR(reglements.created_at) = YEAR(CURDATE())
         AND MONTH(reglements.created_at) = MONTH(CURDATE());
@@ -68,7 +68,7 @@ class ReglementRepository {
   async countFindAllReglementDay() {
     return (
       await db.claudexBarsDB.query(`
-        SELECT CAST(SUM(totalFacture)AS VARCHAR(255)) AS reglementDayTotalNumber 
+        SELECT CAST(SUM(totalFacture)AS CHAR(255)) AS reglementDayTotalNumber 
         FROM reglements
         WHERE YEAR(reglements.created_at) = YEAR(CURDATE())
         AND day (reglements.created_at) = day(CURDATE());

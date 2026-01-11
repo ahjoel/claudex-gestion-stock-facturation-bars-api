@@ -125,7 +125,7 @@ class UserRepository {
     }
 
     async countFindAllUsers() {
-        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS VARCHAR(255)) AS userNumber
+        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS CHAR(255)) AS userNumber
                                                   FROM users
                                                   WHERE deleted_by is null;`))[0];
     }

@@ -37,7 +37,7 @@ class FournisseurRepository {
     }
 
     async countFindAllFournisseurs() {
-        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS VARCHAR(255)) AS fournisseursNumber
+        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS CHAR(255)) AS fournisseursNumber
                                                   FROM fournisseurs
                                                   WHERE deleted_by is null;`))[0];
     }

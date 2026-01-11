@@ -61,7 +61,7 @@ class FactureRepository {
     async findAllFacturesR1(limit, offset) {
         return await db.claudexBarsDB.query(
             `
-            SELECT f2.id as id, f2.code as code, c1.name as client,f2.client_id as client_id, f2.created_at AS createdAt, f2.tax as taxe, m.stock as stock, cast(count(m.produit_id) as varchar(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
+            SELECT f2.id as id, f2.code as code, c1.name as client,f2.client_id as client_id, f2.created_at AS createdAt, f2.tax as taxe, m.stock as stock, cast(count(m.produit_id) as char(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
             CASE WHEN r.facture_id IS NOT NULL AND r.deleted_at IS NULL and r.deleted_by IS NULL THEN 'payée' ELSE 'impayée' END AS statut
             FROM mouvements m
             inner join factures f2 on m.facture_id = f2.id 
@@ -79,7 +79,7 @@ class FactureRepository {
     //     return await db.claudexBarsDB.query(
     //         `
     //         // INUTILISE
-    //         SELECT f2.id as id, f2.code as code, f2.client as client, f2.created_at AS createdAt, f2.tax as taxe, cast(count(m.produit_id) as varchar(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
+    //         SELECT f2.id as id, f2.code as code, f2.client as client, f2.created_at AS createdAt, f2.tax as taxe, cast(count(m.produit_id) as char(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
     //         CASE WHEN r.facture_id IS NOT NULL AND r.deleted_at IS NULL and r.deleted_by IS NULL THEN 'payée' ELSE 'impayée' END AS statut
     //         FROM mouvements m
     //         inner join factures f2 on m.facture_id = f2.id 
@@ -128,26 +128,36 @@ class FactureRepository {
 
     async countFindAllFactureR1() {
         return (await db.claudexBarsDB.query(`
-        SELECT CAST(count(sous_requete.id) AS VARCHAR(255)) AS factureTotalR1Number 
-        FROM (
-            SELECT f2.id as id, f2.code as code, c1.name as client, f2.created_at AS createdAt, f2.tax as taxe, count(m.produit_id) as NbProduit, sum(m.pv * m.qte) AS totalFacture,
-            CASE WHEN r.facture_id IS NOT NULL THEN 'payée' ELSE 'impayée' END AS statut
-            FROM mouvements m
-            inner join factures f2 on m.facture_id = f2.id 
-            INNER JOIN produits p2 on m.produit_id = p2.id
-            INNER JOIN clients c1 ON f2.client_id = c1.id
-            LEFT JOIN 
-                reglements r ON f2.id = r.facture_id
-            AND m.deleted_at IS NULL
-            GROUP BY f2.id 
-            order by f2.id desc
-        ) as sous_requete
+            SELECT CAST(count(sous_requete.id) AS CHAR(255)) AS factureTotalR1Number
+            FROM (
+                SELECT f2.id AS id, 
+                    MAX(f2.code) AS code, 
+                    MAX(c1.name) AS client, 
+                    MAX(f2.created_at) AS createdAt, 
+                    MAX(f2.tax) AS taxe, 
+                    COUNT(m.produit_id) AS NbProduit, 
+                    SUM(m.pv * m.qte) AS totalFacture, 
+                    MAX(m.stock) AS stock,
+                    CASE WHEN r.facture_id IS NOT NULL THEN 'payée' ELSE 'impayée' END AS statut
+                FROM (
+                    SELECT f2.id AS facture_id, m.produit_id, m.pv, m.qte, m.stock
+                    FROM mouvements m
+                    INNER JOIN factures f2 ON m.facture_id = f2.id
+                    WHERE m.deleted_at IS NULL
+                ) AS m
+                INNER JOIN factures f2 ON m.facture_id = f2.id
+                INNER JOIN produits p2 ON m.produit_id = p2.id
+                INNER JOIN clients c1 ON f2.client_id = c1.id
+                LEFT JOIN reglements r ON f2.id = r.facture_id
+                GROUP BY f2.id, r.facture_id
+                ORDER BY f2.id DESC
+            ) AS sous_requete
         `))[0];
     }
 
     async countFindAllFactureImpayee() {
         return (await db.claudexBarsDB.query(`
-        SELECT CAST(count(sous_requete.id) AS VARCHAR(255)) AS factureTotalImpayeNumber 
+        SELECT CAST(count(sous_requete.id) AS CHAR(255)) AS factureTotalImpayeNumber 
         FROM (
             SELECT f2.id as id,
                 CASE WHEN r.facture_id IS NOT NULL THEN 'payée' ELSE 'impayée' END AS statut
@@ -166,7 +176,7 @@ class FactureRepository {
     async countFindAllFactureRC() {
         return (await db.claudexBarsDB.query(`
             // INUTILISE
-        SELECT CAST(count(sous_requete.id) AS VARCHAR(255)) AS factureTotalRCNumber 
+        SELECT CAST(count(sous_requete.id) AS CHAR(255)) AS factureTotalRCNumber 
         FROM (
             SELECT f2.id as id, f2.code as code, f2.client as client, f2.created_at AS createdAt, f2.tax as taxe, count(m.produit_id) as NbProduit, sum(m.pv * m.qte) AS totalFacture,
             CASE WHEN r.facture_id IS NOT NULL THEN 'payée' ELSE 'impayée' END AS statut
@@ -184,7 +194,7 @@ class FactureRepository {
     }
 
     async countFindAllFacture() {
-        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS VARCHAR(255)) AS facturesNumber
+        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS CHAR(255)) AS facturesNumber
                                                   FROM factures `))[0];
     }
 
@@ -236,7 +246,7 @@ class FactureRepository {
     async statistitqueListeStockGeneralVenteR1(date) {
         return await db.claudexBarsDB.query(
             `
-            SELECT CAST(ROW_NUMBER() OVER (ORDER BY produits.name) AS VARCHAR(255)) AS id, produits.name AS produit, models.name AS model, fournisseurs.name AS fournisseur,
+            SELECT CAST(ROW_NUMBER() OVER (ORDER BY produits.name) AS CHAR(255)) AS id, produits.name AS produit, models.name AS model, fournisseurs.name AS fournisseur,
             sum(case 
                 when mouvements.created_at < ?
                 then case mouvements.types when 'OUT' then -1 else 1 end
@@ -301,7 +311,7 @@ class FactureRepository {
     async statistitqueListeStockGeneralVenteRC(date) {
         return await db.claudexBarsDB.query(
             `
-            SELECT CAST(ROW_NUMBER() OVER (ORDER BY produits.name) AS VARCHAR(255)) AS id, produits.name AS produit, models.name AS model, fournisseurs.name AS fournisseur,
+            SELECT CAST(ROW_NUMBER() OVER (ORDER BY produits.name) AS CHAR(255)) AS id, produits.name AS produit, models.name AS model, fournisseurs.name AS fournisseur,
             sum(case 
                 when mouvements.created_at < ?
                 then case mouvements.types when 'OUT' then -1 else 1 end
@@ -334,7 +344,7 @@ class FactureRepository {
     async statistitqueArchivageFactureR1(date) {
         return await db.claudexBarsDB.query(
             `
-            SELECT CAST(ROW_NUMBER() OVER (ORDER BY f2.id) AS VARCHAR(255)) AS id, f2.code as code, c1.name as client, f2.created_at AS date_creation, f2.tax as taxe, m.stock, cast(count(m.produit_id) as varchar(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
+            SELECT CAST(ROW_NUMBER() OVER (ORDER BY f2.id) AS CHAR(255)) AS id, f2.code as code, c1.name as client, f2.created_at AS date_creation, f2.tax as taxe, m.stock, cast(count(m.produit_id) as char(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
             CASE WHEN r.facture_id IS NOT NULL AND r.deleted_at IS NULL and r.deleted_by IS NULL THEN 'payée' ELSE 'impayée' END AS statut
             FROM mouvements m
             inner join factures f2 on m.facture_id = f2.id 
@@ -354,7 +364,7 @@ class FactureRepository {
     async statistitqueArchivageFactureRC(date) {
         return await db.claudexBarsDB.query(
             `
-            SELECT CAST(ROW_NUMBER() OVER (ORDER BY f2.id) AS VARCHAR(255)) AS id, f2.code as code, c1.name as client, f2.created_at AS date_creation, f2.tax as taxe, m.stock, cast(count(m.produit_id) as varchar(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
+            SELECT CAST(ROW_NUMBER() OVER (ORDER BY f2.id) AS CHAR(255)) AS id, f2.code as code, c1.name as client, f2.created_at AS date_creation, f2.tax as taxe, m.stock, cast(count(m.produit_id) as char(50)) as nbproduit, sum(m.pv * m.qte) AS totalfacture,
             CASE WHEN r.facture_id IS NOT NULL AND r.deleted_at IS NULL and r.deleted_by IS NULL THEN 'payée' ELSE 'impayée' END AS statut
             FROM mouvements m
             inner join factures f2 on m.facture_id = f2.id 

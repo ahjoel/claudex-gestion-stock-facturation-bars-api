@@ -37,7 +37,7 @@ class ClientRepository {
     }
 
     async countFindAllClients() {
-        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS VARCHAR(255)) AS clientNumber
+        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS CHAR(255)) AS clientNumber
                                                   FROM clients
                                                   WHERE deleted_by is null;`))[0];
     }

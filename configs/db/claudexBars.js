@@ -8,7 +8,8 @@ const claudexBarsDB = mariadb.createPool({
   user: process.env.CLAUDEX_BARS_USER,
   password: process.env.CLAUDEX_BARS_PASSWORD,
   database: process.env.CLAUDEX_BARS_NAME,
-  timezone: 'Z'
+  timezone: 'Z',
+  bigIntAsNumber: true
 });
 
 // Expose the Pool object within this module

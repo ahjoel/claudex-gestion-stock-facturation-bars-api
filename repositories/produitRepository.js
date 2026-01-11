@@ -153,7 +153,7 @@ class ProduitRepository {
   async countFindAllProduit() {
     return (
       await db.claudexBarsDB
-        .query(`SELECT CAST(count(id) AS VARCHAR(255)) AS produitNumber
+        .query(`SELECT CAST(count(id) AS CHAR(255)) AS produitNumber
                                                   FROM produits
                                                   WHERE deleted_by is null AND stock='R1' `)
     )[0];
@@ -162,7 +162,7 @@ class ProduitRepository {
   async countFindAllProduitRc() {
     return (
       await db.claudexBarsDB
-        .query(`SELECT CAST(count(id) AS VARCHAR(255)) AS produitNumber
+        .query(`SELECT CAST(count(id) AS CHAR(255)) AS produitNumber
                                                   FROM produits
                                                   WHERE deleted_by is null AND stock='RC' `)
     )[0];

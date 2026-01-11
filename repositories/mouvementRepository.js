@@ -185,14 +185,27 @@ class MouvementRepository {
     );
   }
 
-  async factureCode() {
+  async factureCode1() {
     return await db.claudexBarsDB.query(
       `
-        SELECT
-        CAST(MONTH(f.created_at) AS VARCHAR(255)) as num_mois,
-        CAST(COUNT(f.id) AS VARCHAR(255)) as nb_id_deja
-        FROM factures f 
-        WHERE MONTH(f.created_at) = MONTH(CURRENT_DATE)
+      SELECT 
+          MONTH(CURRENT_DATE) AS num_mois,
+          COUNT(f.id) AS nb_id_deja
+      FROM factures f
+      WHERE MONTH(f.created_at) = MONTH(CURRENT_DATE);
+
+      `
+    );
+  }
+
+    async factureCodeRc() {
+    return await db.claudexBarsDB.query(
+      `
+      SELECT 
+          MONTH(CURRENT_DATE) AS num_mois,
+          COUNT(f.id) AS nb_id_deja
+      FROM factures f
+      WHERE MONTH(f.created_at) = MONTH(CURRENT_DATE);
       `
     );
   }
@@ -365,7 +378,7 @@ class MouvementRepository {
     return await db.claudexBarsDB.query(
       `
             SELECT
-            CAST(ROW_NUMBER() OVER () AS VARCHAR(255)) AS id,
+            CAST(ROW_NUMBER() OVER () AS CHAR(255)) AS id,
             CONCAT(
                 CASE MONTH(r.created_at)
                     WHEN 1 THEN 'Janvier'
@@ -434,7 +447,7 @@ class MouvementRepository {
   async countFindAllEntreeR1Dispo() {
     return (
       await db.claudexBarsDB.query(`
-        SELECT CAST(count(sous_requete.produitId) AS VARCHAR(255)) AS entreeR1DispoNumber 
+        SELECT CAST(count(sous_requete.produitId) AS CHAR(255)) AS entreeR1DispoNumber 
         FROM
         (SELECT p.id as produitId, p.name as produit, m2.name as model, f.name as fournisseur,
           sum(case 
@@ -470,7 +483,7 @@ class MouvementRepository {
   async countFindAllEntreeRCDispo() {
     return (
       await db.claudexBarsDB.query(`
-        SELECT CAST(count(sous_requete.produitId) AS VARCHAR(255)) AS entreeRCDispoNumber 
+        SELECT CAST(count(sous_requete.produitId) AS CHAR(255)) AS entreeRCDispoNumber 
         FROM
         (SELECT p.id as produitId, p.name as produit, m2.name as model, f.name as fournisseur,
           sum(case 
@@ -506,7 +519,7 @@ class MouvementRepository {
   async countFindAllEntreeR1() {
     return (
       await db.claudexBarsDB
-        .query(`SELECT CAST(count(id) AS VARCHAR(255)) AS entreeR1Number
+        .query(`SELECT CAST(count(id) AS CHAR(255)) AS entreeR1Number
                                                   FROM mouvements
                                                   WHERE deleted_by is null AND types='ADD' AND stock='R1'`)
     )[0];
@@ -515,7 +528,7 @@ class MouvementRepository {
   async countFindAllEntreeRC() {
     return (
       await db.claudexBarsDB
-        .query(`SELECT CAST(count(id) AS VARCHAR(255)) AS entreeRCNumber
+        .query(`SELECT CAST(count(id) AS CHAR(255)) AS entreeRCNumber
                                                   FROM mouvements
                                                   WHERE deleted_by is null AND types='ADD' AND stock='RC'`)
     )[0];
@@ -524,7 +537,7 @@ class MouvementRepository {
   async countFindAllEntreeRC() {
     return (
       await db.claudexBarsDB
-        .query(`SELECT CAST(count(id) AS VARCHAR(255)) AS entreeRCNumber
+        .query(`SELECT CAST(count(id) AS CHAR(255)) AS entreeRCNumber
                                                   FROM mouvements
                                                   WHERE deleted_by is null AND types='ADD' AND stock='RC'`)
     )[0];

@@ -228,10 +228,10 @@ exports.findAllMouvementEntreeR1 = async (request, response) => {
     }
 };
 
-exports.findCodeFacture = async (request, response) => {
+exports.findCodeFactureR1 = async (request, response) => {
     try {
         
-        const codeFactureCount = await mouvementRepository.factureCode();
+        const codeFactureCount = await mouvementRepository.factureCode1();
 
         return sendResponse(
             response,
@@ -243,7 +243,33 @@ exports.findCodeFacture = async (request, response) => {
             }
         );
     } catch (e) {
-        logger.error(request.correlationId + " ==> Error caught in [findCodeFacture findCodeFacture] ==> " + e.stack);
+        logger.error(request.correlationId + " ==> Error caught in [findCodeFacture R1findCodeFacture] ==> " + e.stack);
+        sendResponse(
+            response,
+            500,
+            "ERROR",
+            "An error occurred while processing the request",
+            null
+        );
+    }
+};
+
+exports.findCodeFactureRc = async (request, response) => {
+    try {
+        
+        const codeFactureCount = await mouvementRepository.factureCodeRc();
+
+        return sendResponse(
+            response,
+            200,
+            "SUCCESS",
+            "Request executed successfully",
+            {
+                infos: codeFactureCount
+            }
+        );
+    } catch (e) {
+        logger.error(request.correlationId + " ==> Error caught in [findCodeFacture RcfindCodeFacture] ==> " + e.stack);
         sendResponse(
             response,
             500,

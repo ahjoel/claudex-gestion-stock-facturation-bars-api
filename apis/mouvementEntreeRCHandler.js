@@ -228,10 +228,10 @@ exports.findAllMouvementEntreeRC = async (request, response) => {
     }
 };
 
-exports.findCodeFacture = async (request, response) => {
+exports.findCodeFactureRc = async (request, response) => {
     try {
         
-        const codeFactureCount = await mouvementRepository.factureCode();
+        const codeFactureCount = await mouvementRepository.factureCodeRc();
 
         return sendResponse(
             response,
@@ -243,7 +243,7 @@ exports.findCodeFacture = async (request, response) => {
             }
         );
     } catch (e) {
-        logger.error(request.correlationId + " ==> Error caught in [findCodeFacture findCodeFacture] ==> " + e.stack);
+        logger.error(request.correlationId + " ==> Error caught in [findCodeFacture Rc-findCodeFacture] ==> " + e.stack);
         sendResponse(
             response,
             500,

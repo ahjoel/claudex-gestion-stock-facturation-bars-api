@@ -37,7 +37,7 @@ class ModelRepository {
     }
 
     async countFindAllModels() {
-        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS VARCHAR(255)) AS modelNumber
+        return (await db.claudexBarsDB.query(`SELECT CAST(count(id) AS CHAR(255)) AS modelNumber
                                                   FROM models
                                                   WHERE deleted_by is null;`))[0];
     }
